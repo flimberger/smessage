@@ -1,0 +1,6 @@
+2012-02-26
+feature request: selection -accepted: TODO
+feature request: scrolling -accepted: TODO, optional for horizontal/vertical
+feature request: no buttons -accepted: button handling: ask list if reasonable to duplicate the functionality of thingmenu)
+feature request: timeout wrapper script -accepted: TODO
+feature request: xmessage compat wrapper -accepted: full compatibility seems cheap anyway, only thing is input handling
