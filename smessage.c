@@ -77,13 +77,11 @@ static char *hoverbgcolor = "#005577";
 static char *hoverfgcolor = "#eeeeee";
 static char *fontname = "-*-terminus-medium-r-*-*-16-*-*-*-*-*-*-*";
 
-static int retval   = EXIT_FAILURE;
 static char *name   = NAME;
 static Bool urgent  = False;
 static Bool confirm = False;
-/* TODO: replace by PostQuitMessage() mechanism */
-static Bool running = True;
 
+static Atom wmdelmsg;
 static DC dc;
 static int screen, nbuttons;
 static char *message, *title;
@@ -158,10 +156,9 @@ main(int argc, char *argv[])
 
 	setup();
 	run();
-	cleanup();
-	XCloseDisplay(dpy);
 
-	return (retval);
+	/* not reached */
+	return 0;
 }
 
 /*
@@ -239,9 +236,12 @@ setup(void)
 
 	/* TODO: if window active ... */
 	windowactive = True;
+	wmdelmsg = XInternAtom(dpy, "WM_DELETE_WINDOW", False);
+	XSetWMProtocols(dpy, win, &wmdelmsg, 1);
 
 	XMapWindow(dpy, win);
 	draw();
+	atexit(cleanup);
 }
 
 /*
@@ -259,6 +259,7 @@ cleanup(void)
 	XSync(dpy, False);
 	freelines();
 	free(buttons);
+	XCloseDisplay(dpy);
 }
 
 /*
@@ -563,9 +564,12 @@ run(void)
 {
 	XEvent e;
 
-	while (running) {
+	for (;;) {
 		XNextEvent(dpy, &e);
 		switch (e.type) {
+		case ClientMessage:
+			if ((Atom) e.xclient.data.l[0] == wmdelmsg)
+				exit(EXIT_SUCCESS);
 		case Expose:
 			if (e.xexpose.count == 0)
 				draw();
@@ -602,21 +606,17 @@ handlekey(XEvent *e)
 	key = XKeycodeToKeysym(dpy, e->xkey.keycode, 0);
 	switch (key) {
 	case XK_Escape:
-		if (confirm) {
-			running = False;
-			retval = buttons[CANCEL].retval;
-			break;
-		}
+		if (confirm)
+			exit(buttons[CANCEL].retval);
+		break;
 	case XK_Return:
-		running = False;
 		if (confirm) {
 			if (buttons[CANCEL].selected)
-				retval = buttons[CANCEL].retval;
+				exit(buttons[CANCEL].retval);
 			else
-				retval = buttons[OK].retval;
-		}
-		else
-			retval = buttons->retval;
+				exit(buttons[OK].retval);
+		} else
+			exit(buttons->retval);
 		break;
 	case XK_Left:
 		if (confirm) {
@@ -688,8 +688,7 @@ buttonrelease(XEvent *e)
 
 	b = hovers(e->xbutton.x, e->xbutton.y);
 	if (b != NULL && b->pressed) {
-		running = False;
-		retval = b->retval;
+		exit(b->retval);
 	}
 }
 
