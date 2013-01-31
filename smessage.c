@@ -162,8 +162,8 @@ main(int argc, char *argv[])
 }
 
 /*
- * Sets up ressources for the X window system.
- * CAUTION: Always clean up after this function was called!
+ * Sets up resources for the X window system.
+ * Cleanup is performed by the exit()-function.
  */
 void
 setup(void)
@@ -320,7 +320,7 @@ initfont(void)
 
 	/*
 	 * TODO: find more general solution
-	 * Only works fpr fixed fonts.
+	 * Only works for fixed fonts.
 	 */
 	if (dc.font.set) {
 		i = XmbTextExtents(dc.font.set, "m", sizeof("m"), &ink, &log);
@@ -557,7 +557,6 @@ drawbuttons(void)
 
 /*
  * Main event loop.
- * TODO: close through WM
  */
 void
 run(void)
@@ -722,8 +721,6 @@ hovers(int x, int y)
 
 /*
  * Print usage information and exit application with given exit status.
- * CAUTION: Does not perform any cleanup, so clean up by yourself before calling
- * this function!
  */
 void
 usage(int retval)
