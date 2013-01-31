@@ -742,8 +742,6 @@ usage(int retval)
 
 /*
  * Prints formatted error message to stderr and exits with EXIT_FAILURE.
- * CAUTION: Does not perform any cleanup, so clean up by yourself before calling
- * this function!
  */
 void
 panic(const char *errmesg, ...)
