@@ -7,7 +7,7 @@
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <X11/keysym.h>
+#include <X11/XKBlib.h>
 
 enum {
 	BG,
@@ -602,7 +602,7 @@ handlekey(XEvent *e)
 {
 	KeySym key;
 
-	key = XKeycodeToKeysym(dpy, e->xkey.keycode, 0);
+	key = XkbKeycodeToKeysym(dpy, e->xkey.keycode, 0, 0);
 	switch (key) {
 	case XK_Escape:
 		if (confirm)
