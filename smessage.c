@@ -2,7 +2,12 @@
  * to unselect when window focus is lost.
  * Make pointer selection possible.
 */
-#include "libc.h"
+#include <errno.h>
+#include <locale.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 
 #include <X11/Xlib.h>
@@ -21,9 +26,12 @@ enum {
 	BUFSIZE = 4096
 };
 
-typedef struct Line Line;
-typedef struct DC DC;
-typedef struct Button Button;
+typedef unsigned int	uint;
+typedef unsigned long	ulong;
+
+typedef struct Line	Line;
+typedef struct DC	DC;
+typedef struct Button	Button;
 
 struct Line {
 	uint length;
@@ -61,23 +69,9 @@ struct Button {
 	Bool selected;
 };
 
-/* Configuration variables */
-static int xpos    = 0;
-static int ypos    = 0;
-static uint width  = 0;
-static uint height = 0;
-static uint margin = 10;
-static char *selbgcolor   = "#007799";
-static char *selfgcolor   = "#eeeeee";
-static char *normbgcolor  = "#222222";
-static char *normfgcolor  = "#bbbbbb";
-static char *pressbgcolor = "#003355";
-static char *pressfgcolor = "#eeeeee";
-static char *hoverbgcolor = "#005577";
-static char *hoverfgcolor = "#eeeeee";
-static char *fontname = "-*-terminus-medium-r-*-*-16-*-*-*-*-*-*-*";
+#include "config.h"
 
-static char *name   = NAME;
+static char *name   = "smessage";
 static Bool urgent  = False;
 static Bool confirm = False;
 
@@ -125,7 +119,7 @@ main(int argc, char *argv[])
          */
 	for (i = 1; i < argc; i++)
 		if (!strcmp(argv[i], "-v")) {		/* print version */
-			puts(NAME"-"VERSION", © 2012 Florian Limberger");
+			puts("smessage-"VERSION", © 2012 Florian Limberger");
 			exit(EXIT_SUCCESS);
 		}
 		else if (!strcmp(argv[i], "-h"))	/* print help */

@@ -1,41 +1,35 @@
-NAME=smessage
-VERSION=ALPHA
+# smessage - simple message viewer
+# See LICENSE file for copyright and license details
 
-XINC=/usr/X11R6/include
-XLIB=/usr/X11R6/lib
+include config.mk
 
-INC=-I${XINC}
-LIB=-I${XLIB} -lX11
-
-CDBG=-g -O0
-CPPFLAGS=-D_BSD_SOURCE -D_POSIX_C_SOURCE=2 -DNAME=\"${NAME}\" -DVERSION=\"${VERSION}\"
-CFLAGS=-Wall -Wextra -Werror -std=c99 -pedantic ${DBG} ${INC} ${CPPFLAGS}
-
-LDBG=-g
-LDFLAGS=${LIB} ${LDBG}
-
-CC=cc
-LD=cc
-
-SRC=${NAME}.c
+SRC=smessage.c
 OBJ=${SRC:.c=.o}
 
-.PHONY=all clean options
+.PHONY: all clean options
 
-all: options ${NAME}
-
-.c.o:
-	${CC} ${CFLAGS} -c $<
-
-${NAME}: ${OBJ}
-	${LD} ${LDFLAGS} -o $@ ${OBJ}
-
-clean:
-	rm -f ${OBJ} ${NAME}
+all: options smessage
 
 options:
-	@echo CC=${CC}
-	@echo CFLAGS=${CFLAGS}
-	@echo LD=${LD}
-	@echo LDFLAGS=${LDFLAGS}
-	@echo
+	@echo smessage build options:
+	@echo "CFLAGS  = ${CFLAGS}"
+	@echo "LDFLAGS = ${LDFLAGS}"
+	@echo "CC      = ${CC}"
+
+.c.o:
+	@echo ${CC} $<
+	@${CC} ${CFLAGS} -c $<
+
+${OBJ}: config.h config.mk
+
+config.h:
+	@echo creating $@ from config.def.h
+	@cp config.def.h $@
+
+smessage: ${OBJ}
+	@echo ${CC} -o $@
+	@${CC} ${LDFLAGS} -o $@ ${OBJ}
+
+clean:
+	@echo cleaning
+	@rm -f ${OBJ} smessage
