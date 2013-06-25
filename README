@@ -1,0 +1,24 @@
+smessage - simple message viewer
+================================
+smessage is a simple message display utility for the X window system, which is
+intended to replace xmessage with a more modern and visually appealing
+counterpart.
+
+Requirements
+------------
+In order to build smessage you need the Xlib header files.
+
+Installation
+------------
+Edit config.mk to match your local setup (smessage is installed into the
+/usr/local namespace by default).
+
+Afterwards enter the following command to build and install smessage (if
+necessary as root):
+
+	make clean install
+
+Configuration
+-------------
+The configuration of smessage is done by creating a custom config.h and
+(re)compiling the source code.
