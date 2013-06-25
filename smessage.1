@@ -1,0 +1,40 @@
+.TH SMESSAGE 1 smessage\-VERSION
+.SH NAME
+smessage \- simple message viewer
+.SH SYNOPSIS
+.B smessage
+[
+.B \-c
+] [
+.B \-h
+] [
+.B \-t
+title ] [
+.B \-u
+] [
+.B \-v
+] [ file ]
+.SH DESCRIPTION
+.B smessage
+is a simple message viewing utility which is intended to replace
+.IR xmessage(1)
+with a more modern and visually appealing counterpart.
+.PP
+It reads the contents which are to be displayed from the given file,
+or from standard input otherwise.
+.SH OPTIONS
+.TP
+.B \-c
+show OK and CANCEL Buttons
+.TP
+.B \-h
+prints usage information to standard output
+.TP
+.BI \-t " title"
+set title
+.TP
+.B \-u
+set urgency
+.TP
+.B \-v
+prints version information to standard output

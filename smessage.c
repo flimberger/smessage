@@ -1,7 +1,9 @@
-/* TODO: replace the code to unselect when leaving by code
+/* See LICENSE file for copyright and license details.
+ *
+ * TODO: replace the code to unselect when leaving by code
  * to unselect when window focus is lost.
  * Make pointer selection possible.
-*/
+ */
 #include <errno.h>
 #include <locale.h>
 #include <stdarg.h>
