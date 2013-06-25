@@ -29,14 +29,21 @@ enum {
 typedef unsigned int	uint;
 typedef unsigned long	ulong;
 
-typedef struct Line	Line;
-typedef struct DC	DC;
 typedef struct Button	Button;
+typedef struct DC	DC;
+typedef struct Line	Line;
 
-struct Line {
-	uint length;
-	char *text;
-	Line *next;
+struct Button {
+	int retval;
+	int xpos;
+	int ypos;
+	int width;
+	int height;
+	uint labellen;
+	char *label;
+	Bool pressed;
+	Bool hovered;
+	Bool selected;
 };
 
 struct DC {
@@ -56,61 +63,54 @@ struct DC {
 	} font;
 };
 
-struct Button {
-	int retval;
-	int xpos;
-	int ypos;
-	int width;
-	int height;
-	uint labellen;
-	char *label;
-	Bool pressed;
-	Bool hovered;
-	Bool selected;
+struct Line {
+	uint length;
+	char *text;
+	Line *next;
 };
 
 #include "config.h"
 
-static char *name   = "smessage";
-static Bool urgent  = False;
-static Bool confirm = False;
+static void	buttonhover(XEvent *e);
+static void	buttonpress(XEvent *e);
+static void	buttonrelease(XEvent *e);
+static void	cleanup(void);
+static void	draw(void);
+static void	drawbuttons(void);
+static void	drawmesg(void);
+static void	drawstring(int x, int y, char *s, int l);
+static void	freelines(void);
+static ulong	getcolor(const char *colorname);
+static void	handlekey(XEvent *e);
+static Button	*hovers(int x, int y);
+static void	initbuttons(void);
+static void	initfont(void);
+static void	leavewindow(void);
+static void	makelines(void);
+static void	panic(const char *errmesg, ...);
+static void	run(void);
+static void	setup(void);
+static void	usage(int retval);
 
-static Atom wmdelmsg;
-static DC dc;
-static int screen, nbuttons;
-static char *message, *title;
-static Bool windowactive;
-static Line *lines;
-static Button *buttons;
-static Window root, win;
-static Display *dpy;
+static char	*name   = "smessage";
+static Bool	urgent  = False;
+static Bool	confirm = False;
 
-static void setup(void);
-static void cleanup(void);
-static ulong getcolor(const char *colorname);
-static void initfont(void);
-static void initbuttons(void);
-static void makelines(void);
-static void freelines(void);
-static void draw(void);
-static void drawmesg(void);
-static void drawstring(int x, int y, char *s, int l);
-static void drawbuttons(void);
-static void run(void);
-static void handlekey(XEvent *e);
-static void buttonpress(XEvent *e);
-static void buttonrelease(XEvent *e);
-static void buttonhover(XEvent *e);
-static void leavewindow(void);
-static Button *hovers(int x, int y);
-static void usage(int retval);
-static void panic(const char *errmesg, ...);
+static Button	*buttons;
+static DC	dc;
+static Display	*dpy;
+static Line	*lines;
+static char	*message, *title;
+static Window	root, win;
+static int	screen, nbuttons;
+static Bool	windowactive;
+static Atom	wmdelmsg;
 
 int
 main(int argc, char *argv[])
 {
-	int i;
-	FILE *fin;
+	int	i;
+	FILE	*fin;
 
 	title = argv[0];
 
@@ -162,10 +162,10 @@ main(int argc, char *argv[])
 void
 setup(void)
 {
-	uint          m;
-	XWMHints     *wmh;
-	XClassHint   *ch;
-	XTextProperty tp;
+	uint	m;
+	XWMHints	*wmh;
+	XClassHint	*ch;
+	XTextProperty	tp;
 
 	if (!setlocale(LC_CTYPE, "") || !XSupportsLocale())
 		fprintf(stderr, "warning: no locale support\n");
@@ -276,10 +276,10 @@ getcolor(const char *colorname)
 void
 initfont(void)
 {
-	int i, cnt;
-	char *def, **lst;
-	XRectangle ink, log;
-	XFontStruct **fsl;
+	int	i, cnt;
+	char	*def, **lst;
+	XRectangle	ink, log;
+	XFontStruct	**fsl;
 
 	lst = NULL;
 	dc.font.set = XCreateFontSet(dpy, fontname, &lst, &cnt, &def);
@@ -384,9 +384,9 @@ initbuttons(void)
 void
 makelines(void)
 {
-	int i, mc, ml;
-	char *c;
-	Line *l, *m;
+	char	*c;
+	int	i, mc, ml;
+	Line	*l, *m;
 
 	lines = (Line *) malloc(sizeof(Line));
 	lines->text = message;
@@ -429,7 +429,7 @@ makelines(void)
 void
 freelines(void)
 {
-	Line *l, *m;
+	Line	*l, *m;
 
 	for (l = lines; l->next;) {
 		m = l->next;
@@ -444,8 +444,8 @@ freelines(void)
 void
 draw(void)
 {
-	uint pb, pd;
-	Window pwin;
+	uint	pb, pd;
+	Window	pwin;
 
 	XGetGeometry(dpy, win, &pwin, &xpos, &ypos, &width, &height, &pb, &pd);
 
@@ -473,9 +473,9 @@ draw(void)
 void
 drawmesg(void)
 {
-	int dly;
-	uint i, j, mc, ml;
-	Line *l;
+	int	dly;
+	uint	i, j, mc, ml;
+	Line	*l;
 
 	dly = (dc.font.height + dc.font.leading);
 
@@ -517,9 +517,9 @@ drawstring(int x, int y, char *s, int l)
 void
 drawbuttons(void)
 {
-	int i;
-	ulong *color;
-	XRectangle r;
+	int	i;
+	ulong	*color;
+	XRectangle	r;
 
 	for (i = 0; i < nbuttons; i++) {
 		r.x = buttons[i].xpos;
@@ -555,7 +555,7 @@ drawbuttons(void)
 void
 run(void)
 {
-	XEvent e;
+	XEvent	e;
 
 	for (;;) {
 		XNextEvent(dpy, &e);
@@ -594,7 +594,7 @@ run(void)
 void
 handlekey(XEvent *e)
 {
-	KeySym key;
+	KeySym	key;
 
 	key = XkbKeycodeToKeysym(dpy, e->xkey.keycode, 0, 0);
 	switch (key) {
@@ -634,8 +634,8 @@ handlekey(XEvent *e)
 void
 buttonhover(XEvent *e)
 {
-	int i;
-	Button *b;
+	int	i;
+	Button	*b;
 
 	windowactive = True;
 	b = hovers(e->xmotion.x, e->xmotion.y);
@@ -656,7 +656,7 @@ buttonhover(XEvent *e)
 void
 buttonpress(XEvent *e)
 {
-	Button *b;
+	Button	*b;
 
 	if (e->xbutton.button != Button1)
 		return;
@@ -674,7 +674,7 @@ buttonpress(XEvent *e)
 void
 buttonrelease(XEvent *e)
 {
-	Button *b;
+	Button	*b;
 
 	if (e->xbutton.button != Button1)
 		return;
@@ -702,7 +702,7 @@ leavewindow(void)
 Button *
 hovers(int x, int y)
 {
-	int i;
+	int	i;
 
 	for (i = 0; i < nbuttons; i++)
 		if (x > buttons[i].xpos &&
@@ -719,7 +719,7 @@ hovers(int x, int y)
 void
 usage(int retval)
 {
-	FILE *out;
+	FILE	*out;
 
 	if (retval != EXIT_SUCCESS)
 		out = stderr;
@@ -737,7 +737,7 @@ usage(int retval)
 void
 panic(const char *errmesg, ...)
 {
-	va_list ap;
+	va_list	ap;
 
 	va_start(ap, errmesg);
 	vfprintf(stderr, errmesg, ap);
@@ -745,4 +745,3 @@ panic(const char *errmesg, ...)
 
 	exit(EXIT_FAILURE);
 }
-
