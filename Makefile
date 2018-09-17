@@ -6,30 +6,24 @@ include config.mk
 SRC=smessage.c
 OBJ=${SRC:.c=.o}
 
-.PHONY: all clean options
-
 all: options smessage
+.PHONY:	all
 
 options:
 	@echo smessage build options:
 	@echo "CFLAGS  = ${CFLAGS}"
 	@echo "LDFLAGS = ${LDFLAGS}"
 	@echo "CC      = ${CC}"
-
-.c.o:
-	@echo ${CC} $<
-	@${CC} ${CFLAGS} -c $<
+.PHONY:	options
 
 ${OBJ}: config.h config.mk
 
 config.h:
-	@echo creating $@ from config.def.h
-	@cp config.def.h $@
+	cp config.def.h $@
 
 smessage: ${OBJ}
-	@echo ${CC} -o $@
-	@${CC} ${LDFLAGS} -o $@ ${OBJ}
+	${CC} -o $@ ${OBJ} ${LDFLAGS}
 
 clean:
-	@echo cleaning
-	@rm -f ${OBJ} smessage
+	rm -f ${OBJ} smessage
+.PHONY:	clean
